@@ -51,10 +51,14 @@ async function getTodoUpdate(id, todoModel) {
 
 async function getTodoDelete(id) {
   try {
+    console.log(`Deleting todo with ID: ${id}`);
+    
     const deletedTodo = await Todo.findByIdAndDelete(id);
     if (!deletedTodo) {
       throw new Error('Todo not found');
     }
+    
+    console.log(`Deleted todo with serial number: ${deletedTodo.serialNo}`);
     
     // Reorder serial numbers after deletion
     await reorderSerialNumbers();
@@ -68,17 +72,23 @@ async function getTodoDelete(id) {
 // Reorder serial numbers after deletion
 async function reorderSerialNumbers() {
   try {
-    const todos = await Todo.find().sort({ createdAt: 1 });
+    // Get all todos sorted by their current serial number to maintain order
+    const todos = await Todo.find().sort({ serialNo: 1 });
     console.log(`Reordering ${todos.length} todos after deletion`);
     
-    for (let i = 0; i < todos.length; i++) {
-      try {
-        await Todo.findByIdAndUpdate(todos[i]._id, { serialNo: i + 1 });
-      } catch (updateError) {
-        console.error(`Failed to update serial number for todo ${todos[i]._id}:`, updateError);
-        // Continue with other todos even if one fails
+    // Use bulk operations for better performance
+    const bulkOps = todos.map((todo, index) => ({
+      updateOne: {
+        filter: { _id: todo._id },
+        update: { serialNo: index + 1 }
       }
+    }));
+    
+    if (bulkOps.length > 0) {
+      await Todo.bulkWrite(bulkOps);
+      console.log(`Successfully reordered ${bulkOps.length} todos`);
     }
+    
     console.log('Serial number reordering completed');
   } catch (error) {
     console.error('Error in reorderSerialNumbers:', error);

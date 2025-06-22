@@ -97,9 +97,15 @@ async function addColumn(columnData) {
       throw new Error(`Column with field '${columnData.field}' already exists`);
     }
     
-    // Set order if not provided
+    // Find the highest order number to ensure new column is added at the end
+    let maxOrder = -1;
+    if (config.columns.length > 0) {
+      maxOrder = Math.max(...config.columns.map(col => col.order || 0));
+    }
+    
+    // Set order to be at the end (highest order + 1)
     if (columnData.order === undefined) {
-      columnData.order = config.columns.length;
+      columnData.order = maxOrder + 1;
     }
     
     // Ensure S.No column is always first
@@ -171,6 +177,24 @@ async function deleteColumn(columnId) {
       { $pull: { columns: { _id: columnId } } },
       { new: true }
     );
+    
+    // Reorder remaining columns to ensure sequential order
+    if (updatedConfig && updatedConfig.columns.length > 0) {
+      const sortedColumns = updatedConfig.columns.sort((a, b) => (a.order || 0) - (b.order || 0));
+      
+      // Update order numbers to be sequential
+      const bulkOps = sortedColumns.map((column, index) => ({
+        updateOne: {
+          filter: { _id: updatedConfig._id, 'columns._id': column._id },
+          update: { $set: { 'columns.$.order': index } }
+        }
+      }));
+      
+      if (bulkOps.length > 0) {
+        await TableConfig.bulkWrite(bulkOps);
+        console.log('Columns reordered after deletion');
+      }
+    }
     
     return updatedConfig.toObject();
   } catch (error) {

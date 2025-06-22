@@ -87,8 +87,50 @@ const validateColumn = (req, res, next) => {
     next();
 };
 
+const validatePartialColumn = (req, res, next) => {
+    const { title, field, order, width, editable } = req.body;
+    
+    // For partial updates, we only validate what's provided
+    if (title !== undefined && !title) {
+        return res.status(400).json({ 
+            error: 'Column title cannot be empty' 
+        });
+    }
+    
+    if (field !== undefined) {
+        // Field name validation (should be a valid JavaScript property name)
+        const fieldRegex = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+        if (!fieldRegex.test(field)) {
+            return res.status(400).json({ 
+                error: 'Field name must be a valid JavaScript property name' 
+            });
+        }
+    }
+    
+    if (order !== undefined && (typeof order !== 'number' || order < 0)) {
+        return res.status(400).json({ 
+            error: 'Order must be a non-negative number' 
+        });
+    }
+    
+    if (width !== undefined && (typeof width !== 'number' || width < 1)) {
+        return res.status(400).json({ 
+            error: 'Width must be a positive number' 
+        });
+    }
+    
+    if (editable !== undefined && typeof editable !== 'boolean') {
+        return res.status(400).json({ 
+            error: 'Editable must be a boolean' 
+        });
+    }
+    
+    next();
+};
+
 module.exports = {
     validateTodo,
     validateTableConfig,
-    validateColumn
+    validateColumn,
+    validatePartialColumn
 }; 

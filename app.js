@@ -29,10 +29,10 @@ app.use('/', tableConfigRoutes);
 // Database connection
 async function connectDB() {
     try {
-        await mongoose.connect('mongodb://localhost:27017/', {
+        await mongoose.connect('mongodb+srv://ubdaleuddin:D4MZHZibZl7MVZ0K@cluster0.sas4xpq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
             dbName: 'todo-data',
         });
-        console.log('Connected to MongoDB successfully');
+        console.log('Connected to MongoDB Atlas successfully');
     } catch (err) {
         console.error('MongoDB connection error:', err);
         process.exit(1);

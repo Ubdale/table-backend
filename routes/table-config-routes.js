@@ -9,7 +9,7 @@ const {
   updateColumn,
   deleteColumn
 } = require("../handler/tableConfigHandler");
-const { validateTableConfig, validateColumn } = require("../middleware/validation");
+const { validateTableConfig, validateColumn, validatePartialColumn } = require("../middleware/validation");
 
 // Table configuration operations
 router.get("/table-config", async (req, res) => {
@@ -73,7 +73,7 @@ router.post("/table-config/columns", validateColumn, async (req, res) => {
   }
 });
 
-router.put("/table-config/columns/:columnId", validateColumn, async (req, res) => {
+router.put("/table-config/columns/:columnId", validatePartialColumn, async (req, res) => {
   try {
     const config = await updateColumn(req.params.columnId, req.body);
     res.json(config);
