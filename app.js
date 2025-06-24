@@ -7,9 +7,13 @@ const tableConfigRoutes = require('./routes/table-config-routes')
 var cors = require('cors')
 
 // Middleware
-app.use(cors());
-app.use(express.json());
-
+// Middleware
+app.use(cors({
+    origin: 'https://table-frontend-liard.vercel.app',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true
+  }));
+  app.use(express.json());
 // Health check endpoint
 app.get('/', (req, res) => {
   res.json({ 
