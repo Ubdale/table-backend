@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = process.env.PORT || 3000
 const mongoose = require('mongoose')
 const todoRoutes = require('./routes/todo-routes')
 const tableConfigRoutes = require('./routes/table-config-routes')
@@ -28,7 +28,13 @@ app.use('/', todoRoutes);
 app.use('/', tableConfigRoutes);
 const MONGODB_URI = process.env.MONGODB_URI;
 
+if (!MONGODB_URI) {
+    console.error('Error: MONGODB_URI environment variable is not set.');
+    process.exit(1);
+}
 
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', port);
 
 // Database connection
 async function connectDB() {
