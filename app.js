@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const todoRoutes = require('./routes/todo-routes')
 const tableConfigRoutes = require('./routes/table-config-routes')
 var cors = require('cors')
+require('dotenv').config();
 
 // Middleware
 app.use(cors());
@@ -25,13 +26,16 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/', todoRoutes);
 app.use('/', tableConfigRoutes);
+const MONGODB_URI = process.env.MONGODB_URI;
+
+
 
 // Database connection
 async function connectDB() {
     try {
-        await mongoose.connect('mongodb+srv://ubdaleuddin:D4MZHZibZl7MVZ0K@cluster0.sas4xpq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', {
-            dbName: 'todo-data',
-        });
+  await mongoose.connect(MONGODB_URI, {
+    dbName: 'todo-data',
+});
         console.log('Connected to MongoDB Atlas successfully');
     } catch (err) {
         console.error('MongoDB connection error:', err);
