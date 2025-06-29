@@ -5,7 +5,11 @@ const mongoose = require('mongoose')
 const todoRoutes = require('./routes/todo-routes')
 const tableConfigRoutes = require('./routes/table-config-routes')
 var cors = require('cors')
-require('dotenv').config();
+
+// Only load dotenv in development
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 // Middleware
 app.use(cors());
